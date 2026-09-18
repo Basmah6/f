@@ -108,6 +108,7 @@ export const IrregularVerbsModal: React.FC<IrregularVerbsModalProps> = ({
   const [quizSelectedOption, setQuizSelectedOption] = useState<string | null>(null);
   const [quizScore, setQuizScore] = useState({ correct: 0, total: 0 });
   const [isQuizEnlarged, setIsQuizEnlarged] = useState(false);
+  const [isTableEnlarged, setIsTableEnlarged] = useState(false);
 
   // Specific role of V2/V3 for the active tense
   const roleInfo = useMemo(() => getV2V3TenseRoleAr(tenseId), [tenseId]);
@@ -118,16 +119,28 @@ export const IrregularVerbsModal: React.FC<IrregularVerbsModalProps> = ({
 
   // Reset enlarged mode if tab changes or modal closes
   useEffect(() => {
-    if (!isOpen || activeTab !== 'quiz') {
+    if (!isOpen) {
+      setIsQuizEnlarged(false);
+      setIsTableEnlarged(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (activeTab !== 'quiz') {
       setIsQuizEnlarged(false);
     }
-  }, [isOpen, activeTab]);
+    if (activeTab !== 'table') {
+      setIsTableEnlarged(false);
+    }
+  }, [activeTab]);
 
   // Handle ESC key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        if (isQuizEnlarged) {
+        if (isTableEnlarged) {
+          setIsTableEnlarged(false);
+        } else if (isQuizEnlarged) {
           setIsQuizEnlarged(false);
         } else if (isFullscreen) {
           setIsFullscreen(false);
@@ -138,7 +151,7 @@ export const IrregularVerbsModal: React.FC<IrregularVerbsModalProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isQuizEnlarged, isFullscreen, onClose]);
+  }, [isOpen, isTableEnlarged, isQuizEnlarged, isFullscreen, onClose]);
 
   // Filtered & Sorted Verbs
   const filteredVerbs = useMemo(() => {
@@ -278,9 +291,9 @@ export const IrregularVerbsModal: React.FC<IrregularVerbsModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ========================================================================= */}
-        {/* 1. EXPANDED & SPACIOUS HEADER BANNER (Hidden in Quiz Enlarged Focus Mode) */}
+        {/* 1. EXPANDED & SPACIOUS HEADER BANNER (Hidden in Focus Mode) */}
         {/* ========================================================================= */}
-        {!isQuizEnlarged && (
+        {!isQuizEnlarged && !isTableEnlarged && (
           <div className="bg-slate-900 text-white px-5 py-4 sm:px-8 sm:py-5 border-b border-slate-800 shrink-0">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               {/* Title & Context */}
@@ -470,8 +483,49 @@ export const IrregularVerbsModal: React.FC<IrregularVerbsModalProps> = ({
                     <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                     <span>{sortBy === 'alpha' ? 'ترتيب أبجدي (A-Z)' : 'ترتيب حسب النمط'}</span>
                   </button>
+
+                  {/* Focus Mode Button (Enlarge Table / Cards Workspace without distractions) */}
+                  <button
+                    id="btn-toggle-table-focus"
+                    onClick={() => setIsTableEnlarged(!isTableEnlarged)}
+                    className={`px-3 py-2 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                      isTableEnlarged
+                        ? 'bg-amber-100 text-amber-950 border-amber-300 ring-2 ring-amber-400/20'
+                        : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+                    }`}
+                    title={isTableEnlarged ? "إنهاء وضع التركيز واستعادة باقي الأشرطة (Esc)" : "وضع التركيز: تكبير هذا المحتوى فقط دون باقي المشتتات"}
+                  >
+                    {isTableEnlarged ? (
+                      <>
+                        <Minimize2 className="w-3.5 h-3.5 text-amber-700" />
+                        <span>إنهاء التركيز (Esc)</span>
+                      </>
+                    ) : (
+                      <>
+                        <Maximize2 className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>وضع التركيز</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
+
+              {/* Focused Mode Banner (Shown when table focus mode is active) */}
+              {isTableEnlarged && (
+                <div className="flex items-center justify-between bg-amber-50/80 px-3.5 py-2 rounded-xl border border-amber-200 text-amber-950 text-xs font-bold font-arabic shadow-2xs animate-fadeIn">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span>وضع التركيز نشط: تم تكبير جدول وبطاقات الأفعال وإخفاء باقي المشتتات العلوية والسفلية للتركيز الكامل.</span>
+                  </div>
+                  <button
+                    onClick={() => setIsTableEnlarged(false)}
+                    className="px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
+                  >
+                    <Minimize2 className="w-3 h-3" />
+                    <span>استعادة العرض الكامل (Esc)</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* ========================================================================= */}
@@ -827,43 +881,45 @@ export const IrregularVerbsModal: React.FC<IrregularVerbsModalProps> = ({
               )}
             </div>
 
-            {/* Bottom Status bar */}
-            <div className="px-4 py-2.5 bg-white border-t border-slate-200 shrink-0 flex items-center justify-between text-xs text-slate-500 font-arabic">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span>
-                  إجمالي الأفعال المعروضة: <strong>{filteredVerbs.length}</strong> من أصل {IRREGULAR_VERBS_DATA.length} فعلاً
-                </span>
-                {onlyCommon && (
-                  <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">
-                    الأكثر شيوعاً فقط
+            {/* Bottom Status bar (Hidden when in Focus Mode without distractions) */}
+            {!isTableEnlarged && (
+              <div className="px-4 py-2.5 bg-white border-t border-slate-200 shrink-0 flex items-center justify-between text-xs text-slate-500 font-arabic">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span>
+                    إجمالي الأفعال المعروضة: <strong>{filteredVerbs.length}</strong> من أصل {IRREGULAR_VERBS_DATA.length} فعلاً
                   </span>
-                )}
-                {selectedLetter !== 'ALL' && (
-                  <span className="text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 font-bold">
-                    الحرف: {selectedLetter}
+                  {onlyCommon && (
+                    <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">
+                      الأكثر شيوعاً فقط
+                    </span>
+                  )}
+                  {selectedLetter !== 'ALL' && (
+                    <span className="text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 font-bold">
+                      الحرف: {selectedLetter}
+                    </span>
+                  )}
+                  <span className="text-slate-400 hidden sm:inline">
+                    • انقر على أي سطر أو بطاقة لفتح الفحص الشامل للفعل بكافة صيغه
                   </span>
-                )}
-                <span className="text-slate-400 hidden sm:inline">
-                  • انقر على أي سطر أو بطاقة لفتح الفحص الشامل للفعل بكافة صيغه
-                </span>
-              </div>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsFullscreen(!isFullscreen)}
-                  className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer text-xs hidden sm:inline-flex items-center gap-1"
-                >
-                  {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-                  <span>{isFullscreen ? 'تصغير' : 'ملء الشاشة'}</span>
-                </button>
-                <button
-                  onClick={onClose}
-                  className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition cursor-pointer text-xs"
-                >
-                  إغلاق النافذة
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsFullscreen(!isFullscreen)}
+                    className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer text-xs hidden sm:inline-flex items-center gap-1"
+                  >
+                    {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                    <span>{isFullscreen ? 'تصغير' : 'ملء الشاشة'}</span>
+                  </button>
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition cursor-pointer text-xs"
+                  >
+                    إغلاق النافذة
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
