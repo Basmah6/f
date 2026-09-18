@@ -83,10 +83,6 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
             دورة إتقان أزمنة اللغة الإنجليزية (12 زمناً)
           </h1>
 
-          <p className="text-xs sm:text-sm font-semibold text-blue-100 font-sans-en tracking-wide" dir="ltr">
-            Master All 12 English Tenses — From SVO Structure to Full Fluency
-          </p>
-
           <p className="text-blue-50 text-xs sm:text-sm md:text-base leading-[1.75] font-arabic max-w-2xl font-normal">
             دورة شاملة وتفاعلية لإتقان كافة أزمنة اللغة الإنجليزية الـ 12، وضبط تراكيب الجمل الإنجليزية (SVO)، مع شروحات دقيقة، تمارين تكوين وتصحيح ذكي، واختبارات قياس متكاملة.
           </p>
@@ -349,7 +345,7 @@ export const CourseOverview: React.FC<CourseOverviewProps> = ({
                     />
                   </div>
 
-                  <button className="w-full py-2.5 rounded-xl bg-[#84a5f2] group-hover:bg-[#214ecf] hover:bg-[#214ecf] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_3px_0_0_#5b82df,0_4px_12px_rgba(132,165,242,0.3)] group-hover:shadow-[0_3px_0_0_#153696,0_6px_16px_rgba(33,78,207,0.35)] hover:shadow-[0_3px_0_0_#153696,0_6px_16px_rgba(33,78,207,0.35)] active:translate-y-[2px] active:shadow-none font-arabic cursor-pointer">
+                  <button className="w-full py-2.5 rounded-xl bg-[#214ecf] group-hover:bg-[#214ecf] hover:bg-[#214ecf] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all duration-200 shadow-[0_3px_0_0_#153696,0_6px_16px_rgba(33,78,207,0.35)] group-hover:shadow-[0_3px_0_0_#153696,0_6px_16px_rgba(33,78,207,0.35)] hover:shadow-[0_3px_0_0_#153696,0_6px_16px_rgba(33,78,207,0.35)] active:translate-y-[2px] active:shadow-none font-arabic cursor-pointer">
                     <span>فتح وحدات الدرس (7 وحدات)</span>
                     <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-1" />
                   </button>
